@@ -15,4 +15,5 @@ Content-Type: application/json
   "text": "lorem ipsum"
 }
 
-### TODO: Add more requests to test
+### GET /note/:id (DNE)
+GET {{host}}/notes/24

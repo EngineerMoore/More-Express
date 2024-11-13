@@ -2,39 +2,30 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 
+// Parse json aka how we access the body in post request
+app.use(express.json())
+
 // Simple logging middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.originalUrl}`);
   next();
 });
 
-// /notes endpoints
-const notes = require("./data/notes");
+app.use("/notes", require("./api/notes")) ;
 
-app.get("/notes", (req, res) => {
-  res.json(notes);
+// Next(Argument) goes directly to error middleware.
+/* Q: Why is argument in brackets, and do we always pass in status and message?
+A: {} create the err object represented by the err parameter in error-handler middleware*/
+app.use((req, res, next) => {
+  next({status: 404, message: `Endpoint not found.`});
 });
 
-app.get("/notes/:id", (req, res, next) => {
-  const { id } = req.params;
-  const note = notes.find((n) => n.id === +id);
-  if (note) {
-    res.json(note);
-  } else {
-    res.status(404).send(`Note with id ${id} does not exist.`);
-  }
-});
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status ?? 500);
+  res.json(err.message ?? `Sorry something went wrong!`);
+})
 
-app.post("/notes", (req, res, next) => {
-  const { text } = req.body;
-  if (text) {
-    notes.push({ id: notes.length + 1, text });
-    res.status(201).json(notes.at(-1));
-  } else {
-    res.status(400).send(`New note must have text.`);
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}...`);
+app.listen(PORT, ()        => {
+  console.log(`Listening o)n port ${PORT}...`);
 });
